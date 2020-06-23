@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dropbox
+  namespace: services
+  labels:
+    app: dropbox
+    project: services
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dropbox
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: dropbox
+    spec:
+      hostNetwork: true
+      nodeName: rin
+      containers:
+      - name: dropbox
+        image: chipu/dropbox
+        ports:
+        - containerPort: 17500
+        volumeMounts:
+        - mountPath: /opt/dropbox/Dropbox
+          name: dropbox-share
+        - mountPath: /opt/dropbox/.dropbox
+          name: dropbox-settings
+        - mountPath: /etc/timezone
+          name: dropbox-timezone
+        - mountPath: /etc/localtime
+          name: dropbox-localtime
+        env:
+        - name: DROPBOX_UID
+          value: "1000"
+        - name: DROPBOX_GID
+          value: "1000"
+      volumes:
+      - name: dropbox-share
+        hostPath:
+          path: "/dropbox"
+          type: DirectoryOrCreate
+      - name: dropbox-settings
+        hostPath:
+          path: "/.dropbox"
+          type: DirectoryOrCreate
+      - name: dropbox-timezone
+        hostPath:
+          path: "/etc/timezone"
+      - name: dropbox-localtime
+        hostPath:
+          path: "/etc/localtime"

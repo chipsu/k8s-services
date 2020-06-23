@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: syncthing
+  namespace: services
+  labels:
+    app: syncthing
+    project: services
+spec:
+  selector:
+    matchLabels:
+      app: syncthing
+  template:
+    metadata:
+      labels:
+        app: syncthing
+    spec:
+      hostNetwork: true
+      containers:
+      - name: syncthing
+        image: syncthing/syncthing
+        ports:
+        - containerPort: 8384
+        - containerPort: 22000
+        volumeMounts:
+        - mountPath: /var/syncthing
+          name: syncthing-default
+        - mountPath: /k8s
+          name: syncthing-k8s
+      volumes:
+      - name: syncthing-default
+        hostPath:
+          path: "/sync"
+          type: DirectoryOrCreate
+      - name: syncthing-k8s
+        hostPath:
+          path: "/k8s"
+          type: DirectoryOrCreate
